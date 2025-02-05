@@ -204,8 +204,11 @@ A lightweight, cloud-native, open-source Security Information & Event Management
     - Endpoint security
 
 - **Data Processing & Storage** 🔄
-  - ⏳ Elasticsearch for primary storage
-  - ⏳ Monthly index rotation with mapping templates
+  - ✅ Elasticsearch integration:
+    - Primary storage with optimized mappings
+    - Monthly index rotation with ILM policies
+    - Hot/Warm/Cold/Delete lifecycle management
+    - Enrichment pipeline support
   - ✅ Log enrichment pipeline:
     - Timestamp normalization and timezone handling
     - Processing metadata

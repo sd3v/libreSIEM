@@ -4,10 +4,10 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import json
 import logging
-from elasticsearch import Elasticsearch
 from confluent_kafka import Consumer, KafkaError, Message
 from libreSIEM.config import Settings, get_settings
 from libreSIEM.collector.models import LogEvent
+from libreSIEM.processor.elasticsearch import ElasticsearchManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,43 +28,14 @@ class LogProcessor:
         self.consumer = Consumer(kafka_config)
         self.consumer.subscribe([self.settings.RAW_LOGS_TOPIC])
         
-        # Initialize Elasticsearch client
-        self.es = Elasticsearch(
-            hosts=[self.settings.elasticsearch.ES_HOSTS],
-            basic_auth=(self.settings.elasticsearch.ES_USERNAME, self.settings.elasticsearch.ES_PASSWORD)
-            if self.settings.elasticsearch.ES_USERNAME and self.settings.elasticsearch.ES_PASSWORD
-            else None,
-            verify_certs=self.settings.elasticsearch.ES_SSL_VERIFY
-        )
-        
-        # Ensure index exists
-        self._ensure_index()
+        # Initialize Elasticsearch manager
+        self.es_manager = ElasticsearchManager(settings)
         
         logger.info("Log processor initialized")
     
     def _ensure_index(self):
-        """Create the logs index if it doesn't exist."""
-        index_name = f"logs-{datetime.now().strftime('%Y.%m')}"
-        if not self.es.indices.exists(index=index_name):
-            self.es.indices.create(
-                index=index_name,
-                body={
-                    "settings": {
-                        "number_of_shards": 1,
-                        "number_of_replicas": 0
-                    },
-                    "mappings": {
-                        "properties": {
-                            "timestamp": {"type": "date"},
-                            "source": {"type": "keyword"},
-                            "event_type": {"type": "keyword"},
-                            "data": {"type": "object"},
-                            "enriched": {"type": "object"}
-                        }
-                    }
-                }
-            )
-            logger.info(f"Created index {index_name}")
+        """Deprecated: Index management is now handled by ElasticsearchManager."""
+        pass
     
     def enrich_log(self, log_event: LogEvent) -> Dict[str, Any]:
         """Enrich a log event with additional context."""
@@ -113,8 +84,7 @@ class LogProcessor:
     def store_document(self, doc: Dict[str, Any]):
         """Store a document in Elasticsearch."""
         try:
-            index_name = f"logs-{datetime.now().strftime('%Y.%m')}"
-            self.es.index(index=index_name, document=doc)
+            self.es_manager.store_document(doc)
         except Exception as e:
             logger.error(f"Error storing document in Elasticsearch: {str(e)}")
     
