@@ -182,21 +182,22 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 ## 🌟 Key Features
 
 - **Event Collection & Ingestion** 🔄
-  - ✅ REST API with JWT authentication and rate limiting
-  - ✅ Kafka-based message queue for reliability
+  - ✅ REST API for log ingestion
+  - ⏳ JWT authentication and rate limiting
+  - ⏳ Kafka-based message queue for reliability
   - ✅ Multi-format log parsing:
     - Apache Combined Log Format
     - Syslog with automatic year handling
     - JSON with flexible schema
-  - ✅ Batch ingestion support
+  - ⏳ Batch ingestion support
   - ✅ Input validation and sanitization
   - ⏳ Webhooks, Fluentd, and Filebeat support
   - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
   - ⏳ Support for firewalls, IDS/IPS, endpoints
 
 - **Data Processing & Storage** 🔄
-  - ✅ Elasticsearch for primary storage
-  - ✅ Monthly index rotation with mapping templates
+  - ⏳ Elasticsearch for primary storage
+  - ⏳ Monthly index rotation with mapping templates
   - ✅ Log enrichment pipeline:
     - Timestamp normalization and timezone handling
     - Processing metadata
@@ -227,6 +228,9 @@ A lightweight, cloud-native, open-source Security Information & Event Management
   - ✅ Real-time data visualization with Tremor
   - ✅ Dark/Light mode support
   - ✅ Responsive design for all devices
+  - ✅ Interactive security events management
+  - ✅ Real-time threat analytics
+  - ✅ User settings and preferences
   - ✅ Interactive analytics dashboard:
     - Log volume trends and patterns
     - Source distribution analysis
