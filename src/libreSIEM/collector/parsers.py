@@ -48,11 +48,39 @@ class LogParser:
             sample='127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "http://www.example.com/start.html" "Mozilla/4.08 [en] (Win98; I ;Nav)"'
         ))
         
+        # Palo Alto firewall format
         self.add_format(LogFormat(
-            name="json",
+            name="paloalto",
+            pattern=r"^(?P<event_type>\w+),(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}),(?P<serial>[\w\-]+),(?P<type>\w+),(?P<subtype>\w+),(?P<source_ip>[\d\.]+),(?P<destination_ip>[\d\.]+),(?P<source_port>\d+),(?P<destination_port>\d+),(?P<protocol>\w+)$",
+            fields={
+                "event_type": "string",
+                "timestamp": "datetime",
+                "serial": "string",
+                "type": "string",
+                "subtype": "string",
+                "source_ip": "string",
+                "destination_ip": "string",
+                "source_port": "integer",
+                "destination_port": "integer",
+                "protocol": "string"
+            },
+            sample="traffic,2024-02-05 14:11:05,001234567890,traffic,end,10.0.0.1,192.168.1.1,1234,80,TCP"
+        ))
+        
+        # Suricata IDS format
+        self.add_format(LogFormat(
+            name="suricata",
             pattern=r"^(?P<json>{.*})$",
             fields={"json": "json"},
-            sample='{"timestamp": "2024-02-05T12:23:09Z", "level": "info", "message": "Sample log"}'
+            sample='{"event_type": "alert", "src_ip": "10.0.0.1", "dest_ip": "192.168.1.1", "alert": {"signature_id": 2001, "category": "Attempted Information Leak", "severity": 2}}'
+        ))
+        
+        # CrowdStrike endpoint format
+        self.add_format(LogFormat(
+            name="crowdstrike",
+            pattern=r"^(?P<json>{.*})$",
+            fields={"json": "json"},
+            sample='{"device_id": "test-device", "event_type": "DetectionSummaryEvent", "timestamp": "2024-02-05T14:11:05Z", "severity": "high", "detection_name": "Test Detection", "src_ip": "10.0.0.1", "dst_ip": "192.168.1.1"}'
         ))
     
     def add_format(self, format: LogFormat):
@@ -66,7 +94,7 @@ class LogParser:
                 return name
         return None
     
-    def parse_line(self, log_line: str, format_name: Optional[str] = None) -> Tuple[bool, Dict[str, Any]]:
+    async def parse_line(self, log_line: str, format_name: Optional[str] = None, source: str = None, event_type: str = "log", vendor: Optional[str] = None) -> Optional[LogEvent]:
         """Parse a log line using the specified or auto-detected format."""
         try:
             # Try JSON first if no format specified
@@ -74,22 +102,25 @@ class LogParser:
                 try:
                     data = json.loads(log_line)
                     if isinstance(data, dict):
-                        return True, data
+                        return self.create_event(data, source, event_type, vendor)
                 except json.JSONDecodeError:
                     pass
                 
                 # Auto-detect format
                 format_name = self.detect_format(log_line)
                 if not format_name:
-                    return False, {"error": "Unable to detect log format"}
+                    logger.error("Unable to detect log format")
+                    return None
             
             if format_name not in self.formats:
-                return False, {"error": f"Unknown format: {format_name}"}
+                logger.error(f"Unknown format: {format_name}")
+                return None
             
             format = self.formats[format_name]
             match = re.match(format.pattern, log_line)
             if not match:
-                return False, {"error": f"Log line does not match format {format_name}"}
+                logger.error(f"Log line does not match format {format_name}")
+                return None
             
             # Extract and convert fields
             data = {}
@@ -112,21 +143,20 @@ class LogParser:
                         
                         data[field_name] = dt.astimezone().isoformat()
                     except ValueError as e:
-                        return False, {"error": f"Failed to parse timestamp '{value}': {str(e)}"}
-
-                        data[field_name] = value
+                        logger.error(f"Failed to parse timestamp '{value}': {str(e)}")
+                        return None
                 elif field_type == "json":
                     data.update(json.loads(value))
                 else:
                     data[field_name] = value
             
-            return True, data
+            return self.create_event(data, source, event_type, vendor)
             
         except Exception as e:
             logger.error(f"Error parsing log line: {e}")
-            return False, {"error": str(e)}
+            return None
     
-    def create_event(self, data: Dict[str, Any], source: str, event_type: str = "log") -> LogEvent:
+    def create_event(self, data: Dict[str, Any], source: str, event_type: str = "log", vendor: Optional[str] = None) -> LogEvent:
         """Create a LogEvent from parsed data."""
         # Extract timestamp if present in common fields
         timestamp = None
@@ -140,5 +170,6 @@ class LogParser:
             source=source,
             event_type=event_type,
             timestamp=timestamp,
+            vendor=vendor,
             data=data
         )

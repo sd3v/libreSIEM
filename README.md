@@ -183,14 +183,15 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 
 - **Event Collection & Ingestion** 🔄
   - ✅ REST API for log ingestion
-  - ⏳ JWT authentication and rate limiting
-  - ⏳ Kafka-based message queue for reliability
+  - ✅ JWT authentication with IP binding and brute-force protection
+  - ✅ Redis-based rate limiting with per-user quotas
   - ✅ Multi-format log parsing:
     - Apache Combined Log Format
     - Syslog with automatic year handling
     - JSON with flexible schema
-  - ⏳ Batch ingestion support
+  - ✅ Batch ingestion with granular rate limits
   - ✅ Input validation and sanitization
+  - ✅ Detailed error reporting and rate limit tracking
   - ⏳ Webhooks, Fluentd, and Filebeat support
   - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
   - ⏳ Support for firewalls, IDS/IPS, endpoints
@@ -474,6 +475,11 @@ ES_INDEX_PREFIX=libresiem
 - Docker Compose and Kubernetes Helm Charts available
 - CI/CD integration with GitHub Actions/GitLab CI
 - Built-in monitoring with Prometheus & Grafana
+
+## ⚠️ Known Issues
+
+### Testing
+- **Azure Integration Tests**: The Azure integration tests are currently skipped due to difficulties in mocking the Azure SDK's async context managers. This needs to be fixed by properly mocking the `query_workspace` method's async context manager behavior.
 
 ## 👥 Contributing
 

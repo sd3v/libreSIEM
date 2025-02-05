@@ -2,17 +2,27 @@
 
 from datetime import datetime, timedelta
 from typing import Optional, Dict
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 import bcrypt
 from pydantic import BaseModel
 import os
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Security settings
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-here")  # Change in production
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    logger.warning("JWT_SECRET_KEY not set! Generating a random key...")
+    SECRET_KEY = os.urandom(32).hex()
+
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+MAX_FAILED_LOGIN_ATTEMPTS = int(os.getenv("MAX_FAILED_LOGIN_ATTEMPTS", "5"))
+LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES", "15"))
 
 class Token(BaseModel):
     """Token response model."""
@@ -81,24 +91,56 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    """Get current user from JWT token."""
+async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)) -> User:
+    """Get current user from JWT token with enhanced security checks."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # Decode and verify the token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Basic token validation
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+            
+        # Validate token expiration
+        exp = payload.get("exp")
+        if not exp or datetime.fromtimestamp(exp) < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        # IP validation (if token was issued with IP binding)
+        token_ip = payload.get("ip")
+        if token_ip and token_ip != request.client.host:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token was issued for a different IP address",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        # Get user and validate scopes
+        token_scopes = payload.get("scopes", [])
+        token_data = TokenData(username=username, scopes=token_scopes)
+        
+    except JWTError as e:
+        logger.warning(f"JWT validation failed: {str(e)}")
         raise credentials_exception
+        
+    # Get and validate user
     user = get_user(fake_users_db, username=token_data.username)
     if user is None:
+        logger.warning(f"User not found: {username}")
         raise credentials_exception
+        
+    # Update user scopes from token
+    user.scopes = token_data.scopes
     return user
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
