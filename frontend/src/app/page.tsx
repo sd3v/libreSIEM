@@ -1,164 +1,141 @@
-"use client";
+'use client';
 
-import { Card, Title, Text, Tab, TabList, TabGroup, TabPanel, TabPanels } from "@tremor/react";
-import { BarChart, LineChart } from "@tremor/react";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const logData = [
+// Beispiel-Log-Daten
+const mockLogs = [
   {
-    date: "2024-02-01",
-    "Total Logs": 234,
-    "Error Logs": 13,
-    "Warning Logs": 45,
+    id: 'log1',
+    timestamp: '2025-02-05 16:34:22',
+    source: 'Firewall',
+    severity: 'HIGH',
+    message: 'Multiple failed login attempts detected from IP 192.168.1.100',
+    raw: '{"src_ip":"192.168.1.100","attempts":5,"protocol":"SSH","dst_port":22}',
   },
   {
-    date: "2024-02-02",
-    "Total Logs": 245,
-    "Error Logs": 15,
-    "Warning Logs": 52,
+    id: 'log2',
+    timestamp: '2025-02-05 16:33:15',
+    source: 'IDS',
+    severity: 'MEDIUM',
+    message: 'Suspicious outbound connection to known malicious host',
+    raw: '{"dst_ip":"10.0.0.55","connection_type":"TCP","flags":"SYN"}',
   },
-  // Add more sample data here
+  // ... weitere Logs
 ];
 
-const sourceData = [
-  {
-    source: "Apache",
-    logs: 1234,
-  },
-  {
-    source: "Syslog",
-    logs: 856,
-  },
-  {
-    source: "Application",
-    logs: 543,
-  },
+// Beispiel-Statistiken
+const stats = [
+  { name: 'Events/sec', value: '1,234', trend: '+5%' },
+  { name: 'Alerts (24h)', value: '47', trend: '-12%' },
+  { name: 'Failed Logins', value: '23', trend: '+2' },
+  { name: 'System Load', value: '78%', trend: '+5%' },
 ];
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timeRange, setTimeRange] = useState('15m');
+  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Title>Dashboard</Title>
-          <Text>Monitor your system&apos;s health and security</Text>
+    <div className="min-h-screen bg-gray-900">
+      {/* Suchleiste */}
+      <div className="border-b border-gray-800 bg-gray-900 p-4 sticky top-0 z-10">
+        <div className="flex items-center space-x-4">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='source="firewall" severity="HIGH" | stats count by src_ip'
+              className="w-full bg-gray-800 text-gray-100 px-4 py-2 pl-10 rounded border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            />
+            <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+          </div>
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="bg-gray-800 text-gray-100 px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="15m">Last 15 minutes</option>
+            <option value="1h">Last 1 hour</option>
+            <option value="24h">Last 24 hours</option>
+            <option value="7d">Last 7 days</option>
+          </select>
         </div>
       </div>
 
-      <TabGroup>
-        <TabList className="mt-8">
-          <Tab>Overview</Tab>
-          <Tab>Log Analysis</Tab>
-          <Tab>Security</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-              {/* Log Volume Trends */}
-              <Card>
-                <Title>Log Volume Trends</Title>
-                <LineChart
-                  className="mt-4 h-72"
-                  data={logData}
-                  index="date"
-                  categories={["Total Logs", "Error Logs", "Warning Logs"]}
-                  colors={["blue", "red", "yellow"]}
-                  yAxisWidth={40}
-                />
-              </Card>
+      {/* Statistik-Panel */}
+      <div className="grid grid-cols-4 gap-4 p-4 bg-gray-900">
+        {stats.map((stat) => (
+          <div key={stat.name} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+            <div className="text-sm text-gray-400">{stat.name}</div>
+            <div className="mt-1 flex items-baseline justify-between">
+              <div className="text-2xl font-semibold text-gray-100">{stat.value}</div>
+              <div className={`text-sm ${stat.trend.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                {stat.trend}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-              {/* Log Sources Distribution */}
-              <Card>
-                <Title>Log Sources Distribution</Title>
-                <BarChart
-                  className="mt-4 h-72"
-                  data={sourceData}
-                  index="source"
-                  categories={["logs"]}
-                  colors={["blue"]}
-                  yAxisWidth={40}
-                />
-              </Card>
-
-              {/* Recent Security Events */}
-              <Card>
-                <Title>Recent Security Events</Title>
-                <div className="mt-4">
-                  <div className="space-y-2">
-                    {[
-                      "Failed login attempt from IP 192.168.1.100",
-                      "Firewall rule violation detected",
-                      "New user account created",
-                    ].map((event, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <Text>{event}</Text>
-                        <Text className="text-gray-500">2m ago</Text>
+      {/* Log-Tabelle */}
+      <div className="p-4">
+        <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-900">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Timestamp
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Source
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Severity
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Message
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700 bg-gray-800">
+                {mockLogs.map((log) => (
+                  <tr 
+                    key={log.id} 
+                    className="hover:bg-gray-700 cursor-pointer group"
+                    onClick={() => console.log('Show raw log:', log.raw)}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                      {log.timestamp}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {log.source}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        log.severity === 'HIGH' ? 'bg-red-900 text-red-200' :
+                        log.severity === 'MEDIUM' ? 'bg-yellow-900 text-yellow-200' :
+                        'bg-blue-900 text-blue-200'
+                      }`}>
+                        {log.severity}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      {log.message}
+                      <div className="hidden group-hover:block mt-2 text-xs text-gray-500 font-mono">
+                        {log.raw}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-
-              {/* System Health */}
-              <Card>
-                <Title>System Health</Title>
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Text>CPU Usage</Text>
-                    <Text>45%</Text>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div
-                      className="h-2 rounded-full bg-green-500"
-                      style={{ width: "45%" }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Text>Memory Usage</Text>
-                    <Text>68%</Text>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div
-                      className="h-2 rounded-full bg-yellow-500"
-                      style={{ width: "68%" }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Text>Disk Usage</Text>
-                    <Text>23%</Text>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div
-                      className="h-2 rounded-full bg-green-500"
-                      style={{ width: "23%" }}
-                    />
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="mt-6">
-              <Card>
-                <Title>Log Analysis</Title>
-                <Text>Coming soon...</Text>
-              </Card>
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="mt-6">
-              <Card>
-                <Title>Security Overview</Title>
-                <Text>Coming soon...</Text>
-              </Card>
-            </div>
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
