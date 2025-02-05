@@ -217,12 +217,18 @@ A lightweight, cloud-native, open-source Security Information & Event Management
     - Full-text search
     - Time-based queries
     - Field-specific filtering
-  - ⏳ Advanced enrichment:
-    - GeoIP lookup
-    - DNS resolution
-    - Threat intelligence
-  - ⏳ Cold storage support (S3, MinIO)
-  - ⏳ Log deduplication
+  - ✅ Advanced enrichment:
+    - GeoIP lookup with city, country, ASN data
+    - DNS resolution with caching
+    - Threat intelligence from multiple sources
+  - ✅ Cold storage support:
+    - AWS S3 integration
+    - MinIO compatibility
+    - Configurable archival rules
+  - ✅ Log deduplication:
+    - Fuzzy matching based on event fingerprints
+    - Configurable deduplication window
+    - Memory-efficient caching
 
 - **Threat Detection & Correlation** ⏳
   - ⏳ Real-time detection rules

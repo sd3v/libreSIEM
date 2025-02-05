@@ -8,6 +8,7 @@ from confluent_kafka import Consumer, KafkaError, Message
 from libreSIEM.config import Settings, get_settings
 from libreSIEM.collector.models import LogEvent
 from libreSIEM.processor.elasticsearch import ElasticsearchManager
+from libreSIEM.processor.enrichment import EnrichmentProcessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,32 +32,43 @@ class LogProcessor:
         # Initialize Elasticsearch manager
         self.es_manager = ElasticsearchManager(settings)
         
+        # Initialize enrichment processor
+        self.enrichment_processor = EnrichmentProcessor(settings)
+        
         logger.info("Log processor initialized")
     
     def _ensure_index(self):
         """Deprecated: Index management is now handled by ElasticsearchManager."""
         pass
     
-    def enrich_log(self, log_event: LogEvent) -> Dict[str, Any]:
+    async def enrich_log(self, log_event: LogEvent) -> Dict[str, Any]:
         """Enrich a log event with additional context."""
-        enriched = {}
-        
         # Add timestamp if not present
         if not log_event.timestamp:
             log_event.timestamp = datetime.now()
         
-        # Add basic enrichments
-        enriched["processing_timestamp"] = datetime.now().isoformat()
+        # Convert LogEvent to dictionary
+        base_event = {
+            'timestamp': log_event.timestamp.isoformat(),
+            'source': log_event.source,
+            'event_type': log_event.event_type,
+            'data': log_event.data
+        }
         
-        # TODO: Add more enrichments like:
-        # - GeoIP lookup for IP addresses
-        # - DNS resolution for hostnames
-        # - Threat intelligence lookups
-        # - MITRE ATT&CK classification
+        if hasattr(log_event, 'vendor') and log_event.vendor:
+            base_event['vendor'] = log_event.vendor
+        
+        # Apply enrichment processors
+        enriched = await self.enrichment_processor.enrich_log(base_event)
+        
+        # If the event was deduplicated, return None
+        if enriched is None:
+            logger.debug(f"Dropping duplicate event from {log_event.source}")
+            return None
         
         return enriched
     
-    def process_message(self, msg: Message) -> Optional[Dict[str, Any]]:
+    async def process_message(self, msg: Message) -> Optional[Dict[str, Any]]:
         """Process a single message from Kafka."""
         try:
             # Parse the message
@@ -64,18 +76,13 @@ class LogProcessor:
             log_event = LogEvent(**value)
             
             # Enrich the log
-            enriched = self.enrich_log(log_event)
+            enriched = await self.enrich_log(log_event)
             
-            # Prepare document for Elasticsearch
-            doc = {
-                "timestamp": log_event.timestamp.isoformat(),
-                "source": log_event.source,
-                "event_type": log_event.event_type,
-                "data": log_event.data,
-                "enriched": enriched
-            }
+            # Skip if the event was deduplicated
+            if enriched is None:
+                return None
             
-            return doc
+            return enriched
             
         except Exception as e:
             logger.error(f"Error processing message: {str(e)}")
@@ -88,7 +95,7 @@ class LogProcessor:
         except Exception as e:
             logger.error(f"Error storing document in Elasticsearch: {str(e)}")
     
-    def run(self):
+    async def run(self):
         """Run the processor loop."""
         try:
             while True:
