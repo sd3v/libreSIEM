@@ -5,13 +5,7 @@ A modern, open-source Security Information and Event Management (SIEM) system wi
 ## Screenshots
 
 ### Dashboard Overview
-![Dashboard Overview](./SIEMS_Images/Dashboard.png)
-
-### Security Monitoring
-![Security Monitoring](./SIEMS_Images/Security.png)
-
-### Analytics and Reporting
-![Analytics and Reporting](./SIEMS_Images/Analytics.png)
+![Dashboard Overview](./SIEMS_Images/Dashboard_LibreSIEM.png)
 
 ## Quick Start
 
