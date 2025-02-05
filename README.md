@@ -4,16 +4,18 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 
 ## 🌟 Key Features
 
-- **Event Collection & Ingestion**
-  - Syslog, APIs, Webhooks, Kafka, Fluentd, and Filebeat support
-  - Agentless collection for cloud services (AWS, Azure, GCP)
-  - Support for firewalls, IDS/IPS, endpoints, Kubernetes, and VPNs
-  - Scalable event queue processing (Kafka, RabbitMQ, NATS)
+- **Event Collection & Ingestion** 🔄
+  - ✅ Basic Kafka support implemented
+  - 🔄 API ingestion (in progress)
+  - ⏳ Syslog, Webhooks, Fluentd, and Filebeat support
+  - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
+  - ⏳ Support for firewalls, IDS/IPS, endpoints, Kubernetes, and VPNs
+  - ⏳ Additional queue systems (RabbitMQ, NATS)
 
-- **Data Processing & Storage**
-  - Elasticsearch/OpenSearch/ClickHouse for primary storage
-  - Cold storage support (S3, Google Cloud Storage, MinIO)
-  - Automated log deduplication, parsing, and threat intelligence enrichment
+- **Data Processing & Storage** ⏳
+  - ⏳ Elasticsearch/OpenSearch/ClickHouse for primary storage
+  - ⏳ Cold storage support (S3, Google Cloud Storage, MinIO)
+  - ⏳ Automated log deduplication, parsing, and threat intelligence enrichment
 
 - **Threat Detection & Correlation**
   - Sigma Rules & YARA malware signature detection
@@ -21,10 +23,10 @@ A lightweight, cloud-native, open-source Security Information & Event Management
   - Real-time alerts via Webhook, Slack, Discord, Telegram
   - SIEM integrations (Splunk, Sentinel, QRadar)
 
-- **Modern Dashboard & UI**
-  - React/Next.js frontend
-  - Node.js/FastAPI backend
-  - Advanced visualization with Grafana/Kibana
+- **Modern Dashboard & UI** 🔄
+  - ✅ FastAPI backend foundation
+  - ⏳ React/Next.js frontend
+  - ⏳ Advanced visualization with Grafana/Kibana
 
 - **SOAR Capabilities**
   - Automated response playbooks

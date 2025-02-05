@@ -68,13 +68,13 @@ class Collector:
             if not event.timestamp:
                 event.timestamp = datetime.now(UTC)
             
-            # Prepare event for Kafka - use the event data directly
-            event_data = event.data
-            event_data.update({
+            # Prepare event for Kafka - maintain event structure
+            event_data = {
                 "source": event.source,
                 "event_type": event.event_type,
-                "timestamp": event.timestamp.isoformat()
-            })
+                "timestamp": event.timestamp.isoformat(),
+                "data": event.data
+            }
             
             # Send to Kafka
             self.producer.produce(

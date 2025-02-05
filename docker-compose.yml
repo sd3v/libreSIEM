@@ -31,6 +31,11 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_CFG_NUM_PARTITIONS=1
       - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_LOG_RETENTION_HOURS=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS=0
     volumes:
       - kafka_data:/bitnami/kafka
 
@@ -59,10 +64,18 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - RAW_LOGS_TOPIC=test_raw_logs
       - PYTHONUNBUFFERED=1
+      - PYTHONGC=debug
+      - PYTHONDEVMODE=1
     volumes:
       - .:/app
     depends_on:
       - kafka
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
 volumes:
   es_data:
