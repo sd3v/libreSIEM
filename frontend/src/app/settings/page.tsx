@@ -1,12 +1,19 @@
 "use client";
 
 import { Card, Title, Text, TabGroup, TabList, Tab, TabPanels, TabPanel, TextInput, Select, SelectItem, Button, Switch } from "@tremor/react";
-import { useState } from "react";
+import { useSettings } from "../hooks/useSettings";
 
 export default function SettingsPage() {
-  const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [emailAlerts, setEmailAlerts] = useState(true);
+  const {
+    settings,
+    isLoading,
+    setTheme,
+    setLanguage,
+    setTimezone,
+    updateNotifications,
+    updateSecurity,
+    updateApi,
+  } = useSettings();
 
   return (
     <div className="space-y-6 p-6 animate-fadeIn">
@@ -45,8 +52,8 @@ export default function SettingsPage() {
                         </Text>
                       </div>
                       <Switch
-                        checked={darkMode}
-                        onChange={setDarkMode}
+                        checked={settings?.theme === 'dark'}
+                        onChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                         className="ml-4"
                       />
                     </div>
@@ -55,7 +62,7 @@ export default function SettingsPage() {
                   {/* Language Settings */}
                   <div className="space-y-2">
                     <Text>Language</Text>
-                    <Select defaultValue="en">
+                    <Select value={settings?.language} onValueChange={setLanguage}>
                       <SelectItem value="en">English</SelectItem>
                       <SelectItem value="de">Deutsch</SelectItem>
                       <SelectItem value="es">Español</SelectItem>
@@ -65,7 +72,7 @@ export default function SettingsPage() {
                   {/* Timezone Settings */}
                   <div className="space-y-2">
                     <Text>Timezone</Text>
-                    <Select defaultValue="utc">
+                    <Select value={settings?.timezone} onValueChange={setTimezone}>
                       <SelectItem value="utc">UTC</SelectItem>
                       <SelectItem value="est">Eastern Time</SelectItem>
                       <SelectItem value="pst">Pacific Time</SelectItem>
@@ -90,8 +97,10 @@ export default function SettingsPage() {
                       </Text>
                     </div>
                     <Switch
-                      checked={notifications}
-                      onChange={setNotifications}
+                      checked={settings?.notifications.enabled}
+                      onChange={(checked) =>
+                        updateNotifications({ enabled: checked })
+                      }
                       className="ml-4"
                     />
                   </div>
@@ -105,8 +114,10 @@ export default function SettingsPage() {
                       </Text>
                     </div>
                     <Switch
-                      checked={emailAlerts}
-                      onChange={setEmailAlerts}
+                      checked={settings?.notifications.email}
+                      onChange={(checked) =>
+                        updateNotifications({ email: checked })
+                      }
                       className="ml-4"
                     />
                   </div>
@@ -114,7 +125,12 @@ export default function SettingsPage() {
                   {/* Alert Settings */}
                   <div className="space-y-2">
                     <Text>Alert Priority</Text>
-                    <Select defaultValue="all">
+                    <Select
+                      value={settings?.notifications.priority || 'all'}
+                      onValueChange={(value) =>
+                        updateNotifications({ priority: value })
+                      }
+                    >
                       <SelectItem value="all">All Alerts</SelectItem>
                       <SelectItem value="high">High Priority Only</SelectItem>
                       <SelectItem value="critical">Critical Only</SelectItem>
@@ -155,13 +171,24 @@ export default function SettingsPage() {
                         Enable 2FA for additional security
                       </Text>
                     </div>
-                    <Switch defaultChecked className="ml-4" />
+                    <Switch
+                      checked={settings?.security.twoFactorAuth}
+                      onChange={(checked) =>
+                        updateSecurity({ twoFactorAuth: checked })
+                      }
+                      className="ml-4"
+                    />
                   </div>
 
                   {/* Session Settings */}
                   <div className="space-y-2">
                     <Text>Session Timeout</Text>
-                    <Select defaultValue="30">
+                    <Select
+                      value={String(settings?.security.sessionTimeout)}
+                      onValueChange={(value) =>
+                        updateSecurity({ sessionTimeout: Number(value) })
+                      }
+                    >
                       <SelectItem value="15">15 minutes</SelectItem>
                       <SelectItem value="30">30 minutes</SelectItem>
                       <SelectItem value="60">1 hour</SelectItem>
@@ -206,7 +233,12 @@ export default function SettingsPage() {
                   {/* Rate Limiting */}
                   <div className="space-y-2">
                     <Text>Rate Limit (requests/minute)</Text>
-                    <Select defaultValue="1000">
+                    <Select
+                      value={String(settings?.api.rateLimit)}
+                      onValueChange={(value) =>
+                        updateApi({ rateLimit: Number(value) })
+                      }
+                    >
                       <SelectItem value="100">100</SelectItem>
                       <SelectItem value="500">500</SelectItem>
                       <SelectItem value="1000">1,000</SelectItem>

@@ -1,68 +1,49 @@
 "use client";
 
-import { Card, Title, Text, TabGroup, TabList, Tab, TabPanels, TabPanel, AreaChart, BarChart, Color } from "@tremor/react";
+import { Card, Title, Text, TabGroup, TabList, Tab, TabPanels, TabPanel, Badge, Button, AreaChart, BarChart } from "@tremor/react";
 import { ShieldCheckIcon, ShieldExclamationIcon, ClockIcon } from "@heroicons/react/24/outline";
-
-const securityEvents = [
-  {
-    timestamp: "2024-02-05 12:30",
-    event: "Failed login attempt",
-    severity: "High",
-    source: "192.168.1.100",
-    status: "Open",
-  },
-  {
-    timestamp: "2024-02-05 12:25",
-    event: "Firewall rule violation",
-    severity: "Medium",
-    source: "192.168.1.150",
-    status: "Investigating",
-  },
-  {
-    timestamp: "2024-02-05 12:20",
-    event: "New user account created",
-    severity: "Low",
-    source: "Internal",
-    status: "Resolved",
-  },
-];
-
-const threatData = [
-  {
-    date: "2024-02-01",
-    "Malware Detected": 23,
-    "Suspicious Activities": 45,
-    "Policy Violations": 20,
-  },
-  {
-    date: "2024-02-02",
-    "Malware Detected": 12,
-    "Suspicious Activities": 54,
-    "Policy Violations": 32,
-  },
-  // Add more data points
-];
+import { useSecurity } from "../hooks/useSecurity";
 
 export default function SecurityPage() {
+  const { events, threats, isLoading, updateEventStatus, getEventStats, getThreatTrends } = useSecurity();
+  const stats = getEventStats();
+  const threatTrends = getThreatTrends();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <Title>Loading security data...</Title>
+          <Text>Please wait while we fetch the latest security information</Text>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6 p-6 animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
-          <Title>Security Operations</Title>
-          <Text>Monitor and respond to security incidents</Text>
+          <Title>Security Overview</Title>
+          <Text>Monitor and manage security events</Text>
         </div>
+        <Button
+          icon={ShieldCheckIcon}
+          className="bg-blue-500 text-white hover:bg-blue-600"
+        >
+          Run Security Scan
+        </Button>
       </div>
 
       {/* Security Overview Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-4">
         <Card className="transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-green-100 p-3 dark:bg-green-900">
-              <ShieldCheckIcon className="h-6 w-6 text-green-700 dark:text-green-300" />
+            <div className="rounded-full bg-red-100 p-3 dark:bg-red-900">
+              <ShieldExclamationIcon className="h-6 w-6 text-red-700 dark:text-red-300" />
             </div>
             <div>
-              <Text>System Status</Text>
-              <Title className="text-green-700 dark:text-green-300">Secure</Title>
+              <Text>Open Events</Text>
+              <Title className="text-red-700 dark:text-red-300">{stats.open}</Title>
             </div>
           </div>
         </Card>
@@ -70,23 +51,37 @@ export default function SecurityPage() {
         <Card className="transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center space-x-4">
             <div className="rounded-full bg-yellow-100 p-3 dark:bg-yellow-900">
-              <ShieldExclamationIcon className="h-6 w-6 text-yellow-700 dark:text-yellow-300" />
+              <ClockIcon className="h-6 w-6 text-yellow-700 dark:text-yellow-300" />
             </div>
             <div>
-              <Text>Active Threats</Text>
-              <Title className="text-yellow-700 dark:text-yellow-300">3</Title>
+              <Text>Investigating</Text>
+              <Title className="text-yellow-700 dark:text-yellow-300">{stats.investigating}</Title>
             </div>
           </div>
         </Card>
 
         <Card className="transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900">
-              <ClockIcon className="h-6 w-6 text-blue-700 dark:text-blue-300" />
+            <div className="rounded-full bg-green-100 p-3 dark:bg-green-900">
+              <ShieldCheckIcon className="h-6 w-6 text-green-700 dark:text-green-300" />
             </div>
             <div>
-              <Text>Last Scan</Text>
-              <Title className="text-blue-700 dark:text-blue-300">5m ago</Title>
+              <Text>Resolved Today</Text>
+              <Title className="text-green-700 dark:text-green-300">{stats.resolved}</Title>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center space-x-4">
+            <div className="rounded-full bg-gray-100 p-3 dark:bg-gray-900">
+              <ShieldCheckIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+            </div>
+            <div>
+              <Text>Total Events</Text>
+              <Title className="text-gray-700 dark:text-gray-300">
+                {stats.open + stats.investigating + stats.resolved}
+              </Title>
             </div>
           </div>
         </Card>
@@ -94,7 +89,7 @@ export default function SecurityPage() {
 
       <TabGroup>
         <TabList>
-          <Tab>Incidents</Tab>
+          <Tab>Security Events</Tab>
           <Tab>Threat Analytics</Tab>
           <Tab>Compliance</Tab>
         </TabList>
@@ -103,42 +98,66 @@ export default function SecurityPage() {
           <TabPanel>
             <div className="mt-6">
               <Card className="transition-all duration-300 hover:shadow-lg">
-                <Title>Security Incidents</Title>
-                <div className="mt-4">
-                  {securityEvents.map((event, index) => (
+                <div className="space-y-4">
+                  {events?.map((event) => (
                     <div
-                      key={index}
-                      className="mb-4 flex items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      key={event.id}
+                      className="flex items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-                      <div className="space-y-1">
-                        <Text className="font-medium">{event.event}</Text>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Text className="font-medium">{event.event}</Text>
+                          <Badge
+                            color={
+                              event.severity === "High"
+                                ? "red"
+                                : event.severity === "Medium"
+                                ? "yellow"
+                                : "green"
+                            }
+                          >
+                            {event.severity}
+                          </Badge>
+                          <Badge
+                            color={
+                              event.status === "Open"
+                                ? "red"
+                                : event.status === "Investigating"
+                                ? "yellow"
+                                : "green"
+                            }
+                          >
+                            {event.status}
+                          </Badge>
+                        </div>
                         <Text className="text-sm text-gray-500">
-                          {event.timestamp} • Source: {event.source}
+                          Source: {event.source}
+                        </Text>
+                        <Text className="text-xs text-gray-400">
+                          {event.timestamp}
                         </Text>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <span
-                          className={`rounded-full px-3 py-1 text-sm ${
-                            event.severity === "High"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                              : event.severity === "Medium"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                              : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          }`}
-                        >
-                          {event.severity}
-                        </span>
-                        <span
-                          className={`rounded-full px-3 py-1 text-sm ${
-                            event.status === "Open"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                              : event.status === "Investigating"
-                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                              : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          }`}
-                        >
-                          {event.status}
-                        </span>
+                      <div className="flex space-x-2">
+                        {event.status === "Open" && (
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                            onClick={() => updateEventStatus({ id: event.id, status: "Investigating" })}
+                          >
+                            Investigate
+                          </Button>
+                        )}
+                        {event.status === "Investigating" && (
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                            onClick={() => updateEventStatus({ id: event.id, status: "Resolved" })}
+                          >
+                            Resolve
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -148,33 +167,16 @@ export default function SecurityPage() {
           </TabPanel>
 
           <TabPanel>
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <div className="mt-6">
               <Card className="transition-all duration-300 hover:shadow-lg">
                 <Title>Threat Trends</Title>
+                <Text>30-day overview of security threats</Text>
                 <AreaChart
                   className="mt-4 h-72"
-                  data={threatData}
+                  data={threatTrends}
                   index="date"
-                  categories={["Malware Detected", "Suspicious Activities", "Policy Violations"]}
+                  categories={["malware", "suspicious", "violations"]}
                   colors={["red", "amber", "blue"]}
-                  valueFormatter={(number) => Intl.NumberFormat("en-US").format(number)}
-                />
-              </Card>
-
-              <Card className="transition-all duration-300 hover:shadow-lg">
-                <Title>Attack Sources</Title>
-                <BarChart
-                  className="mt-4 h-72"
-                  data={[
-                    { source: "External IPs", attacks: 234 },
-                    { source: "Internal Network", attacks: 123 },
-                    { source: "Web Applications", attacks: 321 },
-                    { source: "Email", attacks: 89 },
-                  ]}
-                  index="source"
-                  categories={["attacks"]}
-                  colors={["red"]}
-                  valueFormatter={(number) => Intl.NumberFormat("en-US").format(number)}
                 />
               </Card>
             </div>
@@ -184,24 +186,7 @@ export default function SecurityPage() {
             <div className="mt-6">
               <Card className="transition-all duration-300 hover:shadow-lg">
                 <Title>Compliance Status</Title>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900">
-                    <Text>GDPR Compliance</Text>
-                    <Title className="mt-2">98%</Title>
-                  </div>
-                  <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900">
-                    <Text>ISO 27001</Text>
-                    <Title className="mt-2">100%</Title>
-                  </div>
-                  <div className="rounded-lg bg-purple-50 p-4 dark:bg-purple-900">
-                    <Text>SOC 2</Text>
-                    <Title className="mt-2">95%</Title>
-                  </div>
-                  <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900">
-                    <Text>PCI DSS</Text>
-                    <Title className="mt-2">92%</Title>
-                  </div>
-                </div>
+                <Text>Coming soon with detailed compliance reporting</Text>
               </Card>
             </div>
           </TabPanel>

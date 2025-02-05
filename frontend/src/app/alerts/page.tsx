@@ -2,59 +2,26 @@
 
 import { Card, Title, Text, TabGroup, TabList, Tab, TabPanels, TabPanel, Badge, Button } from "@tremor/react";
 import { BellIcon, BellSlashIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { useAlerts } from "../hooks/useAlerts";
 
-const alerts = [
-  {
-    id: "1",
-    title: "High CPU Usage Detected",
-    description: "Server CPU usage exceeded 90% for more than 5 minutes",
-    severity: "High",
-    timestamp: "2024-02-05 13:15",
-    status: "Active",
-    source: "System Monitor",
-  },
-  {
-    id: "2",
-    title: "Failed Login Attempts",
-    description: "Multiple failed login attempts from IP 192.168.1.100",
-    severity: "Medium",
-    timestamp: "2024-02-05 13:10",
-    status: "Acknowledged",
-    source: "Auth Service",
-  },
-  {
-    id: "3",
-    title: "Database Backup Failed",
-    description: "Scheduled database backup failed to complete",
-    severity: "High",
-    timestamp: "2024-02-05 13:05",
-    status: "Resolved",
-    source: "Backup Service",
-  },
-];
 
-const alertRules = [
-  {
-    name: "High CPU Usage",
-    condition: "CPU > 90% for 5min",
-    severity: "High",
-    enabled: true,
-  },
-  {
-    name: "Failed Logins",
-    condition: "> 5 failed attempts in 10min",
-    severity: "Medium",
-    enabled: true,
-  },
-  {
-    name: "Disk Space",
-    condition: "Free space < 10%",
-    severity: "High",
-    enabled: false,
-  },
-];
+
+
 
 export default function AlertsPage() {
+  const { alerts, isLoading, acknowledgeAlert, resolveAlert, getAlertStats } = useAlerts();
+  const stats = getAlertStats();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <Title>Loading alerts...</Title>
+          <Text>Please wait while we fetch the latest alerts</Text>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6 p-6 animate-fadeIn">
       <div className="flex items-center justify-between">
@@ -79,7 +46,7 @@ export default function AlertsPage() {
             </div>
             <div>
               <Text>Active Alerts</Text>
-              <Title className="text-red-700 dark:text-red-300">5</Title>
+              <Title className="text-red-700 dark:text-red-300">{stats.active}</Title>
             </div>
           </div>
         </Card>
@@ -91,7 +58,7 @@ export default function AlertsPage() {
             </div>
             <div>
               <Text>Acknowledged</Text>
-              <Title className="text-yellow-700 dark:text-yellow-300">3</Title>
+              <Title className="text-yellow-700 dark:text-yellow-300">{stats.acknowledged}</Title>
             </div>
           </div>
         </Card>
@@ -103,7 +70,7 @@ export default function AlertsPage() {
             </div>
             <div>
               <Text>Resolved Today</Text>
-              <Title className="text-green-700 dark:text-green-300">12</Title>
+              <Title className="text-green-700 dark:text-green-300">{stats.resolved}</Title>
             </div>
           </div>
         </Card>
@@ -133,7 +100,7 @@ export default function AlertsPage() {
             <div className="mt-6">
               <Card className="transition-all duration-300 hover:shadow-lg">
                 <div className="space-y-4">
-                  {alerts.map((alert) => (
+                  {alerts?.map((alert) => (
                     <div
                       key={alert.id}
                       className="flex items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -176,16 +143,20 @@ export default function AlertsPage() {
                           size="xs"
                           variant="secondary"
                           className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          onClick={() => acknowledgeAlert(alert.id)}
                         >
                           Acknowledge
                         </Button>
+
                         <Button
                           size="xs"
                           variant="secondary"
                           className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          onClick={() => resolveAlert(alert.id)}
                         >
                           Resolve
                         </Button>
+
                       </div>
                     </div>
                   ))}
@@ -207,7 +178,26 @@ export default function AlertsPage() {
                   </Button>
                 </div>
                 <div className="mt-4 space-y-4">
-                  {alertRules.map((rule, index) => (
+                  {[
+                    {
+                      name: "High CPU Usage",
+                      condition: "CPU > 90% for 5min",
+                      severity: "High",
+                      enabled: true,
+                    },
+                    {
+                      name: "Failed Logins",
+                      condition: "> 5 failed attempts in 10min",
+                      severity: "Medium",
+                      enabled: true,
+                    },
+                    {
+                      name: "Disk Space",
+                      condition: "Free space < 10%",
+                      severity: "High",
+                      enabled: false,
+                    },
+                  ].map((rule, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
