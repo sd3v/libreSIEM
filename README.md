@@ -57,7 +57,35 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 
 ## 🚀 Getting Started
 
-[Coming Soon]
+### Quick Start
+
+1. Clone the repository
+2. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+3. Install dependencies:
+   ```bash
+   poetry install
+   ```
+4. Start required services:
+   ```bash
+   docker-compose up -d
+   ```
+5. Run the collector:
+   ```bash
+   poetry run python -m libreSIEM.collector
+   ```
+
+### Configuration
+
+LibreSIEM is highly configurable through environment variables. Key configuration areas:
+
+- **Kafka Settings**: Configure brokers, security, and topics
+- **Elasticsearch Settings**: Configure cluster, authentication, and indices
+- **Service Settings**: Configure ports, hosts, and logging
+
+See `.env.example` for all available options and `docs/deployment.md` for detailed deployment guides.
 
 ## 📦 Deployment
 
