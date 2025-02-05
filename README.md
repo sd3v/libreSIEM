@@ -230,15 +230,30 @@ A lightweight, cloud-native, open-source Security Information & Event Management
     - Configurable deduplication window
     - Memory-efficient caching
 
-- **Threat Detection & Correlation** ⏳
-  - ⏳ Real-time detection rules
-  - ⏳ Sigma Rules support
-  - ⏳ YARA malware signatures
-  - ⏳ ML-based anomaly detection
-  - ⏳ Alert management:
-    - Email notifications
-    - Webhook integrations
-    - Slack/Discord/Telegram
+- **Threat Detection & Correlation** ✅
+  - ✅ Real-time detection rules:
+    - Custom rule engine with flexible conditions
+    - Field matching, regex support, and numerical comparisons
+    - AND/OR operators for complex rules
+  - ✅ Sigma Rules support:
+    - Full Sigma rule parsing and matching
+    - Support for all Sigma operators and conditions
+    - Compatible with standard Sigma rule format
+  - ✅ YARA malware signatures:
+    - File content scanning
+    - Multiple rule support
+    - Binary pattern matching
+  - ✅ ML-based anomaly detection:
+    - Isolation Forest algorithm
+    - Event type-specific models
+    - Automatic feature extraction
+  - ✅ Alert management:
+    - Rich HTML email notifications
+    - Webhook integrations for custom systems
+    - Slack integration with formatted messages
+    - Discord integration with embeds
+    - Telegram bot notifications
+    - Severity-based routing
 
 - **Modern Dashboard & UI** 🔄
   - ✅ Next.js 14 frontend with App Router

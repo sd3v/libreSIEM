@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .alert {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .alert-header {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .alert-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #2c3e50;
+        }
+        .alert-meta {
+            margin-top: 10px;
+            color: #666;
+        }
+        .alert-severity {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .severity-critical { background-color: #ff4444; color: white; }
+        .severity-high { background-color: #ff8800; color: white; }
+        .severity-medium { background-color: #ffbb33; color: #333; }
+        .severity-low { background-color: #00C851; color: white; }
+        .alert-description {
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+        .alert-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .alert-field {
+            margin-bottom: 10px;
+        }
+        .alert-field-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .alert-tags {
+            margin-top: 15px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            margin-right: 5px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="alert">
+        <div class="alert-header">
+            <h1 class="alert-title">{{ alert.title }}</h1>
+            <div class="alert-meta">
+                <span class="alert-severity severity-{{ alert.severity }}">
+                    {{ alert.severity }}
+                </span>
+                <span style="margin-left: 10px;">{{ alert.timestamp }}</span>
+            </div>
+        </div>
+        
+        <div class="alert-description">
+            {{ alert.description }}
+        </div>
+        
+        <div class="alert-details">
+            <div class="alert-field">
+                <span class="alert-field-label">Rule:</span>
+                <span>{{ alert.rule_name }}</span>
+            </div>
+            <div class="alert-field">
+                <span class="alert-field-label">Source:</span>
+                <span>{{ alert.source_event.source }}</span>
+            </div>
+            {% if alert.matched_fields %}
+            <div class="alert-field">
+                <span class="alert-field-label">Matched Fields:</span>
+                <ul>
+                    {% for field, value in alert.matched_fields.items() %}
+                    <li><strong>{{ field }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if alert.tags %}
+        <div class="alert-tags">
+            {% for tag in alert.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
