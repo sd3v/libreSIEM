@@ -5,35 +5,61 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 ## 🌟 Key Features
 
 - **Event Collection & Ingestion** 🔄
-  - ✅ Basic Kafka support implemented
   - ✅ REST API with JWT authentication and rate limiting
-  - ✅ Multi-format log parsing (Syslog, Apache, JSON)
+  - ✅ Kafka-based message queue for reliability
+  - ✅ Multi-format log parsing:
+    - Apache Combined Log Format
+    - Syslog with automatic year handling
+    - JSON with flexible schema
   - ✅ Batch ingestion support
+  - ✅ Input validation and sanitization
   - ⏳ Webhooks, Fluentd, and Filebeat support
   - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
-  - ⏳ Support for firewalls, IDS/IPS, endpoints, Kubernetes, and VPNs
-  - ⏳ Additional queue systems (RabbitMQ, NATS)
+  - ⏳ Support for firewalls, IDS/IPS, endpoints
 
-- **Data Processing & Storage** ⏳
-  - ⏳ Elasticsearch/OpenSearch/ClickHouse for primary storage
-  - ⏳ Cold storage support (S3, Google Cloud Storage, MinIO)
-  - ⏳ Automated log deduplication, parsing, and threat intelligence enrichment
+- **Data Processing & Storage** 🔄
+  - ✅ Elasticsearch for primary storage
+  - ✅ Monthly index rotation with mapping templates
+  - ✅ Log enrichment pipeline:
+    - Timestamp normalization and timezone handling
+    - Processing metadata
+    - Structured data extraction
+  - ✅ Efficient search capabilities:
+    - Full-text search
+    - Time-based queries
+    - Field-specific filtering
+  - ⏳ Advanced enrichment:
+    - GeoIP lookup
+    - DNS resolution
+    - Threat intelligence
+  - ⏳ Cold storage support (S3, MinIO)
+  - ⏳ Log deduplication
 
-- **Threat Detection & Correlation**
-  - Sigma Rules & YARA malware signature detection
-  - ML-based anomaly detection (Scikit-Learn, TensorFlow, PyTorch)
-  - Real-time alerts via Webhook, Slack, Discord, Telegram
-  - SIEM integrations (Splunk, Sentinel, QRadar)
+- **Threat Detection & Correlation** ⏳
+  - ⏳ Real-time detection rules
+  - ⏳ Sigma Rules support
+  - ⏳ YARA malware signatures
+  - ⏳ ML-based anomaly detection
+  - ⏳ Alert management:
+    - Email notifications
+    - Webhook integrations
+    - Slack/Discord/Telegram
 
 - **Modern Dashboard & UI** 🔄
-  - ✅ FastAPI backend foundation
+  - ✅ FastAPI backend with OpenAPI docs
+  - ✅ Rate limiting for API protection
+  - ✅ Role-based access control
   - ⏳ React/Next.js frontend
-  - ⏳ Advanced visualization with Grafana/Kibana
+  - ⏳ Real-time log viewer
+  - ⏳ Advanced visualizations
 
-- **SOAR Capabilities**
-  - Automated response playbooks
-  - Integration with TheHive, Cortex, Ansible, SaltStack
-  - Python-based automation scripts
+- **SOAR Capabilities** ⏳
+  - ⏳ Automated response playbooks
+  - ⏳ Integration with:
+    - TheHive
+    - Cortex
+    - Ansible
+  - ⏳ Custom Python automation
 
 ## 🚀 Innovation Features
 
@@ -76,9 +102,13 @@ A lightweight, cloud-native, open-source Security Information & Event Management
    ```bash
    docker-compose up -d
    ```
-5. Run the collector:
+5. Run the collector and processor:
    ```bash
+   # Terminal 1: Run the collector
    python -m uvicorn libreSIEM.collector.collector:app --host 0.0.0.0 --port 8000
+
+   # Terminal 2: Run the processor
+   python -m libreSIEM.processor
    ```
 
 ### API Usage
@@ -98,36 +128,152 @@ A lightweight, cloud-native, open-source Security Information & Event Management
      -d '{"source": "test", "event_type": "test", "data": {"message": "test"}}'
    ```
 
-3. Ingest raw logs (supports Syslog, Apache Combined, and JSON formats):
+3. Ingest raw logs:
+   LibreSIEM supports multiple log formats out of the box:
+
+   **Apache Combined Log Format**:
    ```bash
    curl -X POST "http://localhost:8000/ingest/raw" \
      -H "Authorization: Bearer YOUR_TOKEN" \
      -H "Content-Type: application/json" \
-     -d '{"source": "apache", "log_line": "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb.gif HTTP/1.0\" 200 2326", "format": "apache_combined"}'
+     -d '{
+       "source": "apache",
+       "format": "apache_combined",
+       "log_line": "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb.gif HTTP/1.0\" 200 2326 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\""
+     }'
    ```
+
+   **Syslog Format**:
+   ```bash
+   curl -X POST "http://localhost:8000/ingest/raw" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "source": "syslog",
+       "format": "syslog",
+       "log_line": "Feb  5 12:23:09 myhost program[123]: Sample log message"
+     }'
+   ```
+
+   **JSON Format**:
+   ```bash
+   curl -X POST "http://localhost:8000/ingest/raw" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "source": "app",
+       "format": "json",
+       "log_line": "{\"timestamp\": \"2024-02-05T12:23:09Z\", \"level\": \"info\", \"message\": \"Sample log\"}"
+     }'
+   ```
+
+4. Query logs from Elasticsearch:
+   ```bash
+   # Get all logs
+   curl -X GET "http://localhost:9200/logs-*/_search" \
+     -H "Content-Type: application/json" \
+     -d '{"query": {"match_all": {}}}'
+
+   # Search by source
+   curl -X GET "http://localhost:9200/logs-*/_search" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "query": {
+         "term": {
+           "source.keyword": "apache"
+         }
+       }
+     }'
+
+   # Search by time range
+   curl -X GET "http://localhost:9200/logs-*/_search" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "query": {
+         "range": {
+           "timestamp": {
+             "gte": "now-1h",
+             "lte": "now"
+           }
+         }
+       }
+     }'
+   ```
+
+### Architecture
+
+LibreSIEM follows a modular, event-driven architecture:
+
+1. **Collector Service**:
+   - REST API with JWT authentication and rate limiting
+   - Multi-format log parsing (Syslog, Apache, JSON)
+   - Kafka producer for reliable message delivery
+   - Input validation and sanitization
+
+2. **Processor Service**:
+   - Consumes logs from Kafka
+   - Enriches logs with additional context
+   - Handles timestamp normalization
+   - Stores logs in Elasticsearch
+
+3. **Storage Layer**:
+   - Monthly index rotation for efficient data management
+   - Structured mappings for optimized search
+   - Support for hot/warm/cold architectures
 
 ### Configuration
 
-LibreSIEM is highly configurable through environment variables. Key configuration areas:
+LibreSIEM is configured through environment variables:
 
-- **Kafka Settings**: Configure brokers, security, and topics
-- **Redis Settings**: Configure connection for rate limiting
-- **JWT Settings**: Configure secret key and token expiration
-- **Service Settings**: Configure ports, hosts, and logging
-
-Key environment variables:
 ```bash
-# Kafka
-KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-RAW_LOGS_TOPIC=raw_logs
+# Collector Service
+COLLECTOR_HOST=0.0.0.0
+COLLECTOR_PORT=8000
 
-# Redis (for rate limiting)
+# Kafka Settings
+KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:9092
+RAW_LOGS_TOPIC=raw_logs
+KAFKA_CLIENT_ID_PREFIX=libresiem
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+
+# Redis (Rate Limiting)
 REDIS_URL=redis://localhost:6379
 
 # JWT Authentication
 JWT_SECRET_KEY=your-secret-key-here
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Elasticsearch
+ES_HOSTS=http://localhost:9200
+ES_USERNAME=elastic
+ES_PASSWORD=changeme
+ES_SSL_VERIFY=true
+ES_INDEX_PREFIX=libresiem
 ```
+
+### Data Model
+
+1. **Log Event Structure**:
+   ```json
+   {
+     "timestamp": "2025-02-05T12:23:09+01:00",
+     "source": "apache",
+     "event_type": "log",
+     "data": {
+       "remote_host": "127.0.0.1",
+       "request": "GET /apache_pb.gif HTTP/1.0",
+       "status": 200
+     },
+     "enriched": {
+       "processing_timestamp": "2025-02-05T12:23:09+01:00"
+     }
+   }
+   ```
+
+2. **Index Pattern**: `logs-YYYY.MM`
+   - Monthly rotation for efficient data management
+   - Automatic mapping for common fields
+   - Support for dynamic fields in `data` object
 
 ## 📦 Deployment
 

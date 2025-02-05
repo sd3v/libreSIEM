@@ -33,7 +33,7 @@ class LogParser:
         
         self.add_format(LogFormat(
             name="apache_combined",
-            pattern=r'^(?P<remote_host>[\w\-\.:]+)\s+(?P<ident>\S+)\s+(?P<user>\S+)\s+\[(?P<timestamp>[^\]]+)\]\s+"(?P<request>[^"]*?)"\s+(?P<status>\d+)\s+(?P<bytes>\d+)\s+"(?P<referrer>[^"]*?)"\s+"(?P<user_agent>[^"]*?)"$',
+            pattern=r'^(?P<remote_host>[\w\-\.:\[\]]+)\s+(?P<ident>\S+)\s+(?P<user>\S+)\s+\[(?P<timestamp>[^\]]+)\]\s+"(?P<request>[^"]*?)"\s+(?P<status>\d+)\s+(?P<bytes>\d+)\s+"(?P<referrer>[^"]*?)"\s+"(?P<user_agent>[^"]*?)"$',
             fields={
                 "remote_host": "string",
                 "ident": "string",
@@ -98,21 +98,21 @@ class LogParser:
                 if field_type == "integer":
                     data[field_name] = int(value)
                 elif field_type == "datetime":
-                    if format_name == "syslog":
-                        # Add current year since syslog format doesn't include it
-                        current_year = datetime.now().year
-                        try:
+                    try:
+                        if format_name == "syslog":
+                            # Add current year since syslog format doesn't include it
+                            current_year = datetime.now().year
                             dt = datetime.strptime(f"{current_year} {value}", "%Y %b %d %H:%M:%S")
-                            data[field_name] = dt.isoformat()
-                        except ValueError:
-                            return False, {"error": f"Failed to parse timestamp: {value}"}
-                    else:
-                        # Add more datetime format parsing as needed
-                        try:
+                        elif format_name == "apache_combined":
+                            # Parse Apache Combined format timestamp
                             dt = datetime.strptime(value, "%d/%b/%Y:%H:%M:%S %z")
-                            data[field_name] = dt.isoformat()
-                        except ValueError:
-                            return False, {"error": f"Failed to parse timestamp: {value}"}
+                        else:
+                            # Default format
+                            dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                        
+                        data[field_name] = dt.astimezone().isoformat()
+                    except ValueError as e:
+                        return False, {"error": f"Failed to parse timestamp '{value}': {str(e)}"}
 
                         data[field_name] = value
                 elif field_type == "json":

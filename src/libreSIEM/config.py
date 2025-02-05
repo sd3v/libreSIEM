@@ -4,7 +4,7 @@ from functools import lru_cache
 import os
 
 class KafkaSettings(BaseSettings):
-    KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
+    KAFKA_BOOTSTRAP_SERVERS: str = "127.0.0.1:9092"
     KAFKA_CLIENT_ID_PREFIX: str = "libresiem"
     KAFKA_SECURITY_PROTOCOL: str = "PLAINTEXT"
     KAFKA_SASL_MECHANISM: Optional[str] = None
