@@ -192,9 +192,16 @@ A lightweight, cloud-native, open-source Security Information & Event Management
   - ✅ Batch ingestion with granular rate limits
   - ✅ Input validation and sanitization
   - ✅ Detailed error reporting and rate limit tracking
-  - ⏳ Webhooks, Fluentd, and Filebeat support
-  - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
-  - ⏳ Support for firewalls, IDS/IPS, endpoints
+  - ✅ Webhooks support
+  - ⏳ Fluentd and Filebeat support (coming soon)
+  - ✅ Agentless collection for cloud services:
+    - AWS CloudWatch
+    - Azure Monitor
+    - Google Cloud Logging
+  - ✅ Security device integration:
+    - Firewalls
+    - IDS/IPS systems
+    - Endpoint security
 
 - **Data Processing & Storage** 🔄
   - ⏳ Elasticsearch for primary storage
