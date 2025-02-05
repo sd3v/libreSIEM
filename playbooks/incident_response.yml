@@ -1,0 +1,74 @@
+id: incident_response_high_severity
+name: High Severity Incident Response
+description: Automated response for high severity security incidents
+enabled: true
+
+triggers:
+  - field: severity
+    op: in
+    value: ["critical", "high"]
+  - field: tags
+    op: contains
+    value: "security"
+
+actions:
+  - type: thehive
+    name: create_case
+    description: Create case in TheHive
+    parameters:
+      title: "High Severity Incident: {{ alert.title }}"
+      description: |
+        {{ alert.description }}
+        
+        Source Event:
+        {{ alert.source_event | to_json }}
+        
+        Matched Fields:
+        {{ alert.matched_fields | to_json }}
+      severity: 3
+      tags: ["automated", "security"]
+    conditions: []
+    timeout: 60
+
+  - type: cortex
+    name: run_analyzer
+    description: Run threat intelligence analysis
+    parameters:
+      analyzer_id: "Virustotal_GetReport_3_0"
+      data:
+        data: "{{ alert.matched_fields.file_hash }}"
+      wait_for_completion: true
+    conditions:
+      - field: matched_fields
+        op: contains
+        value: "file_hash"
+    timeout: 300
+
+  - type: ansible
+    name: run_playbook
+    description: Block malicious IP addresses
+    parameters:
+      playbook: "playbooks/network/block_ip.yml"
+      inventory:
+        firewalls:
+          hosts:
+            - "{{ settings.network.FIREWALL_HOST }}"
+      variables:
+        ip_address: "{{ alert.matched_fields.source_ip }}"
+    conditions:
+      - field: matched_fields
+        op: contains
+        value: "source_ip"
+    timeout: 120
+
+  - type: python
+    name: custom_enrichment
+    description: Run custom enrichment and correlation
+    parameters:
+      module: "libreSIEM.automation.enrichment"
+      function: "enrich_incident"
+      kwargs:
+        correlation_window: 3600
+        max_events: 1000
+    conditions: []
+    timeout: 180

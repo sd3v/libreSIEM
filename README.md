@@ -279,13 +279,29 @@ A lightweight, cloud-native, open-source Security Information & Event Management
     - Real-time updates
     - Modern card layouts
 
-- **SOAR Capabilities** ⏳
-  - ⏳ Automated response playbooks
-  - ⏳ Integration with:
-    - TheHive
-    - Cortex
-    - Ansible
-  - ⏳ Custom Python automation
+- **SOAR Capabilities** ✅
+  - ✅ Automated response playbooks:
+    - YAML-based playbook definitions
+    - Flexible trigger conditions
+    - Action chaining and orchestration
+    - Timeout and error handling
+  - ✅ Integration with:
+    - TheHive:
+      - Automated case creation
+      - Alert correlation
+      - Evidence management
+    - Cortex:
+      - Threat intelligence analysis
+      - File and URL scanning
+      - IOC enrichment
+    - Ansible:
+      - Network device automation
+      - System configuration
+      - Security control automation
+  - ✅ Custom Python automation:
+    - Custom module support
+    - Async function execution
+    - Rich context passing
 
 ## 🚀 Innovation Features
 
