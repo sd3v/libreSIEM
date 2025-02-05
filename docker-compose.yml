@@ -56,6 +56,19 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
   test:
     build:
       context: .
@@ -66,10 +79,13 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONGC=debug
       - PYTHONDEVMODE=1
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET_KEY=your-test-secret-key-here
     volumes:
       - .:/app
     depends_on:
       - kafka
+      - redis
     deploy:
       resources:
         limits:
@@ -82,3 +98,4 @@ volumes:
   kafka_data:
   prometheus_data:
   grafana_data:
+  redis_data:

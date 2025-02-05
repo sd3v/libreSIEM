@@ -6,8 +6,10 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 
 - **Event Collection & Ingestion** 🔄
   - ✅ Basic Kafka support implemented
-  - 🔄 API ingestion (in progress)
-  - ⏳ Syslog, Webhooks, Fluentd, and Filebeat support
+  - ✅ REST API with JWT authentication and rate limiting
+  - ✅ Multi-format log parsing (Syslog, Apache, JSON)
+  - ✅ Batch ingestion support
+  - ⏳ Webhooks, Fluentd, and Filebeat support
   - ⏳ Agentless collection for cloud services (AWS, Azure, GCP)
   - ⏳ Support for firewalls, IDS/IPS, endpoints, Kubernetes, and VPNs
   - ⏳ Additional queue systems (RabbitMQ, NATS)
@@ -68,7 +70,7 @@ A lightweight, cloud-native, open-source Security Information & Event Management
    ```
 3. Install dependencies:
    ```bash
-   poetry install
+   pip install -r requirements.txt
    ```
 4. Start required services:
    ```bash
@@ -76,7 +78,32 @@ A lightweight, cloud-native, open-source Security Information & Event Management
    ```
 5. Run the collector:
    ```bash
-   poetry run python -m libreSIEM.collector
+   python -m uvicorn libreSIEM.collector.collector:app --host 0.0.0.0 --port 8000
+   ```
+
+### API Usage
+
+1. Get an access token:
+   ```bash
+   curl -X POST "http://localhost:8000/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "username=admin&password=admin"
+   ```
+
+2. Ingest a single log event:
+   ```bash
+   curl -X POST "http://localhost:8000/ingest" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"source": "test", "event_type": "test", "data": {"message": "test"}}'
+   ```
+
+3. Ingest raw logs (supports Syslog, Apache Combined, and JSON formats):
+   ```bash
+   curl -X POST "http://localhost:8000/ingest/raw" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"source": "apache", "log_line": "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb.gif HTTP/1.0\" 200 2326", "format": "apache_combined"}'
    ```
 
 ### Configuration
@@ -84,10 +111,23 @@ A lightweight, cloud-native, open-source Security Information & Event Management
 LibreSIEM is highly configurable through environment variables. Key configuration areas:
 
 - **Kafka Settings**: Configure brokers, security, and topics
-- **Elasticsearch Settings**: Configure cluster, authentication, and indices
+- **Redis Settings**: Configure connection for rate limiting
+- **JWT Settings**: Configure secret key and token expiration
 - **Service Settings**: Configure ports, hosts, and logging
 
-See `.env.example` for all available options and `docs/deployment.md` for detailed deployment guides.
+Key environment variables:
+```bash
+# Kafka
+KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+RAW_LOGS_TOPIC=raw_logs
+
+# Redis (for rate limiting)
+REDIS_URL=redis://localhost:6379
+
+# JWT Authentication
+JWT_SECRET_KEY=your-secret-key-here
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
 
 ## 📦 Deployment
 

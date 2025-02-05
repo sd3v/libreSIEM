@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Logs
+*.log
+logs/
+log/
+
+# Database
+*.db
+*.sqlite3
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Testing
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Documentation
+docs/_build/
+site/
+
+# Misc
+.DS_Store
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+*.bak
+*.tmp
+*.temp
+
+# Kafka
+kafka-logs/
+zookeeper-data/
+
+# Redis
+dump.rdb
+*.rdb
+
+# Specific to libreSIEM
+config.yaml
+config.yml
+*.pem
+*.key
+*.crt
