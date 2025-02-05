@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
+import Providers from './providers';
 import "./globals.css";
 import "./animations.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const geist = Geist({
   subsets: ["latin"],
 });
 
@@ -19,18 +14,14 @@ export const metadata: Metadata = {
   description: "Open Source Security Information and Event Management System",
 };
 
-import Providers from './providers';
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={geist.className}>
         <Providers>
           <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
             <Sidebar />
