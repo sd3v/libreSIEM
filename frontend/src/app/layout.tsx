@@ -1,18 +1,17 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
+import { ThemeProvider } from '../components/ThemeProvider';
 import Sidebar from '../components/Sidebar';
-import ClientLayout from '../components/ClientLayout';
-import Providers from './providers';
+import { ThemeToggle } from '../components/ThemeToggle';
 import './globals.css';
-import './animations.css';
 
 const geist = Geist({
   subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: 'LibreSIEM Command Center',
-  description: 'Next-Generation Security Information and Event Management System',
+  title: 'LibreSIEM',
+  description: 'Security Information and Event Management System',
 };
 
 export default function RootLayout({
@@ -21,13 +20,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${geist.className} bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen`}>
-        <Providers>
-          <ClientLayout sidebar={<Sidebar />}>
-            {children}
-          </ClientLayout>
-        </Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geist.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
+        <ThemeProvider>
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">
+              <ThemeToggle />
+              {children}
+            </main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

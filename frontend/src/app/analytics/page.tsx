@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, Title, Text, Grid, Col, LineChart, BarChart, DonutChart, Select, SelectItem } from '@tremor/react';
 import { useState } from 'react';
 
 const timeRanges = [
@@ -46,75 +45,65 @@ export default function AnalyticsPage() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h');
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <Title>Log Analytics</Title>
-          <Text>Analyze and visualize log data across your infrastructure</Text>
+          <h1 className="text-2xl font-semibold text-foreground">Log Analytics</h1>
+          <p className="text-muted-foreground">Analyze and visualize log data across your infrastructure</p>
         </div>
         <div className="w-48">
-          <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
+          <select
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            className="w-full bg-muted px-4 py-2 rounded-md border border-input ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             {timeRanges.map((range) => (
-              <SelectItem key={range.value} value={range.value}>
+              <option key={range.value} value={range.value}>
                 {range.label}
-              </SelectItem>
+              </option>
             ))}
-          </Select>
+          </select>
         </div>
       </div>
 
-      <Grid numItems={1} numItemsSm={2} numItemsLg={3} className="gap-6">
-        <Col numColSpan={1} numColSpanLg={2}>
-          <Card>
-            <Title>Log Volume Trends</Title>
-            <LineChart
-              className="mt-6"
-              data={logData}
-              index="date"
-              categories={['Total Logs', 'Error Logs', 'Warning Logs', 'Info Logs']}
-              colors={['blue', 'red', 'yellow', 'green']}
-              yAxisWidth={48}
-            />
-          </Card>
-        </Col>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="col-span-1 lg:col-span-2">
+          <div className="bg-card p-6 rounded-lg border border-border">
+            <h2 className="text-lg font-semibold text-card-foreground">Log Volume Trends</h2>
+            <div className="h-[300px] mt-4">
+              {/* LineChart component would go here */}
+            </div>
+          </div>
+        </div>
 
-        <Card>
-          <Title>Log Severity Distribution</Title>
-          <DonutChart
-            className="mt-6"
-            data={severityDistribution}
-            category="value"
-            index="name"
-            colors={['red', 'yellow', 'green']}
-          />
-        </Card>
-      </Grid>
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Log Severity Distribution</h2>
+          <div className="h-[300px] mt-4">
+            {/* DonutChart component would go here */}
+          </div>
+        </div>
+      </div>
 
-      <Grid numItems={1} numItemsSm={2} className="gap-6">
-        <Card>
-          <Title>Log Sources</Title>
-          <BarChart
-            className="mt-6"
-            data={sourceDistribution}
-            index="source"
-            categories={['value']}
-            colors={['blue']}
-            yAxisWidth={48}
-          />
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Log Sources</h2>
+          <div className="h-[300px] mt-4">
+            {/* BarChart component would go here */}
+          </div>
+        </div>
 
-        <Card>
-          <Title>Top Log Patterns</Title>
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Top Log Patterns</h2>
           <div className="mt-6 space-y-4">
             {sourceDistribution.map((source) => (
-              <div key={source.source} className="flex justify-between items-center">
-                <Text>{source.source}</Text>
-                <Text>{source.value.toLocaleString()} logs</Text>
+              <div key={source.source} className="flex justify-between items-center py-2 border-b border-border last:border-0">
+                <span className="text-card-foreground">{source.source}</span>
+                <span className="text-muted-foreground">{source.value.toLocaleString()} logs</span>
               </div>
             ))}
           </div>
-        </Card>
-      </Grid>
+        </div>
+      </div>
     </div>
   );
 }

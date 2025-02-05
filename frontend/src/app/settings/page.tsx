@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, Title, Text, TextInput, Button, Select, SelectItem, Grid, Switch } from '@tremor/react';
 import { useState } from 'react';
 
 const notificationChannels = [
@@ -41,137 +40,158 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div>
-        <Title>Settings</Title>
-        <Text>Configure your LibreSIEM instance</Text>
+        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+        <p className="text-muted-foreground">Configure your LibreSIEM instance</p>
       </div>
 
-      <Grid numItems={1} className="gap-6">
-        <Card>
-          <Title>API Configuration</Title>
+      <div className="space-y-6">
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">API Configuration</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <Text>API Key</Text>
+              <label className="text-sm font-medium text-card-foreground">API Key</label>
               <div className="flex space-x-2 mt-1">
-                <TextInput value={apiKey} readOnly className="flex-1" />
-                <Button onClick={regenerateApiKey}>Regenerate</Button>
+                <input
+                  type="text"
+                  value={apiKey}
+                  readOnly
+                  className="flex-1 bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
+                />
+                <button
+                  onClick={regenerateApiKey}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                >
+                  Regenerate
+                </button>
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card>
-          <Title>Notification Settings</Title>
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Notification Settings</h2>
           <div className="mt-4 space-y-6">
             <div>
-              <Text>Default Notification Channel</Text>
-              <Select
-                className="mt-1"
+              <label className="text-sm font-medium text-card-foreground">Default Notification Channel</label>
+              <select
+                className="mt-1 w-full bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
                 value={notificationChannel}
-                onValueChange={setNotificationChannel}
+                onChange={(e) => setNotificationChannel(e.target.value)}
               >
                 {notificationChannels.map((channel) => (
-                  <SelectItem key={channel.value} value={channel.value}>
+                  <option key={channel.value} value={channel.value}>
                     {channel.label}
-                  </SelectItem>
+                  </option>
                 ))}
-              </Select>
+              </select>
             </div>
 
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between">
-                  <Text>Email Notifications</Text>
-                  <Switch
-                    checked={emailSettings.enabled}
-                    onChange={(checked) =>
-                      setEmailSettings({ ...emailSettings, enabled: checked })
-                    }
-                  />
+                  <label className="text-sm font-medium text-card-foreground">Email Notifications</label>
+                  <button
+                    onClick={() => setEmailSettings({ ...emailSettings, enabled: !emailSettings.enabled })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${emailSettings.enabled ? 'bg-primary' : 'bg-input'}`}
+                  >
+                    <span
+                      className={`${emailSettings.enabled ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-background transition-transform`}
+                    />
+                  </button>
                 </div>
                 {emailSettings.enabled && (
-                  <TextInput
-                    className="mt-2"
+                  <input
+                    type="email"
+                    className="mt-2 w-full bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
                     placeholder="Email address"
                     value={emailSettings.address}
-                    onChange={(e) =>
-                      setEmailSettings({ ...emailSettings, address: e.target.value })
-                    }
+                    onChange={(e) => setEmailSettings({ ...emailSettings, address: e.target.value })}
                   />
                 )}
               </div>
 
               <div>
                 <div className="flex items-center justify-between">
-                  <Text>Slack Notifications</Text>
-                  <Switch
-                    checked={slackSettings.enabled}
-                    onChange={(checked) =>
-                      setSlackSettings({ ...slackSettings, enabled: checked })
-                    }
-                  />
+                  <label className="text-sm font-medium text-card-foreground">Slack Notifications</label>
+                  <button
+                    onClick={() => setSlackSettings({ ...slackSettings, enabled: !slackSettings.enabled })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${slackSettings.enabled ? 'bg-primary' : 'bg-input'}`}
+                  >
+                    <span
+                      className={`${slackSettings.enabled ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-background transition-transform`}
+                    />
+                  </button>
                 </div>
                 {slackSettings.enabled && (
-                  <TextInput
-                    className="mt-2"
+                  <input
+                    type="url"
+                    className="mt-2 w-full bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
                     placeholder="Slack webhook URL"
                     value={slackSettings.webhook}
-                    onChange={(e) =>
-                      setSlackSettings({ ...slackSettings, webhook: e.target.value })
-                    }
+                    onChange={(e) => setSlackSettings({ ...slackSettings, webhook: e.target.value })}
                   />
                 )}
               </div>
 
               <div>
                 <div className="flex items-center justify-between">
-                  <Text>Webhook Notifications</Text>
-                  <Switch
-                    checked={webhookSettings.enabled}
-                    onChange={(checked) =>
-                      setWebhookSettings({ ...webhookSettings, enabled: checked })
-                    }
-                  />
+                  <label className="text-sm font-medium text-card-foreground">Webhook Notifications</label>
+                  <button
+                    onClick={() => setWebhookSettings({ ...webhookSettings, enabled: !webhookSettings.enabled })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${webhookSettings.enabled ? 'bg-primary' : 'bg-input'}`}
+                  >
+                    <span
+                      className={`${webhookSettings.enabled ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-background transition-transform`}
+                    />
+                  </button>
                 </div>
                 {webhookSettings.enabled && (
-                  <TextInput
-                    className="mt-2"
+                  <input
+                    type="url"
+                    className="mt-2 w-full bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
                     placeholder="Webhook URL"
                     value={webhookSettings.url}
-                    onChange={(e) =>
-                      setWebhookSettings({ ...webhookSettings, url: e.target.value })
-                    }
+                    onChange={(e) => setWebhookSettings({ ...webhookSettings, url: e.target.value })}
                   />
                 )}
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card>
-          <Title>Data Retention</Title>
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Data Retention</h2>
           <div className="mt-4">
-            <Text>Log Retention Period</Text>
-            <Select
-              className="mt-1"
+            <label className="text-sm font-medium text-card-foreground">Log Retention Period</label>
+            <select
+              className="mt-1 w-full bg-muted px-3 py-2 rounded-md border border-input text-card-foreground"
               value={retentionPeriod}
-              onValueChange={setRetentionPeriod}
+              onChange={(e) => setRetentionPeriod(e.target.value)}
             >
               {retentionPeriods.map((period) => (
-                <SelectItem key={period.value} value={period.value}>
+                <option key={period.value} value={period.value}>
                   {period.label}
-                </SelectItem>
+                </option>
               ))}
-            </Select>
+            </select>
           </div>
-        </Card>
+        </div>
 
         <div className="flex justify-end space-x-2">
-          <Button variant="secondary">Cancel</Button>
-          <Button>Save Changes</Button>
+          <button
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Save Changes
+          </button>
         </div>
-      </Grid>
+      </div>
     </div>
   );
 }

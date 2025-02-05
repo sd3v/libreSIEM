@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, Title, Text, Grid, Col, LineChart, BarChart, Flex, Badge } from '@tremor/react';
 import { useState } from 'react';
 
 const alertData = [
@@ -41,92 +40,84 @@ const recentAlerts = [
 
 const getSeverityColor = (severity: string) => {
   const colors = {
-    critical: 'red',
-    high: 'orange',
-    medium: 'yellow',
-    low: 'green',
+    critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   };
-  return colors[severity as keyof typeof colors] || 'gray';
+  return colors[severity as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
 };
 
 export default function AlertsPage() {
   const [selectedAlert, setSelectedAlert] = useState<typeof recentAlerts[0] | null>(null);
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div>
-        <Title>Security Alerts</Title>
-        <Text>Monitor and manage security alerts across your infrastructure</Text>
+        <h1 className="text-2xl font-semibold text-foreground">Security Alerts</h1>
+        <p className="text-muted-foreground">Monitor and manage security alerts across your infrastructure</p>
       </div>
 
-      <Grid numItems={1} numItemsSm={2} numItemsLg={3} className="gap-6">
-        <Col numColSpan={1} numColSpanLg={2}>
-          <Card>
-            <Title>Alert Trends</Title>
-            <LineChart
-              className="mt-6"
-              data={alertData}
-              index="date"
-              categories={['Critical Alerts', 'High Alerts', 'Medium Alerts', 'Low Alerts']}
-              colors={['red', 'orange', 'yellow', 'green']}
-              yAxisWidth={40}
-            />
-          </Card>
-        </Col>
-
-        <Card>
-          <Title>Alert Distribution</Title>
-          <BarChart
-            className="mt-6"
-            data={alertData}
-            index="date"
-            categories={['Critical Alerts', 'High Alerts', 'Medium Alerts', 'Low Alerts']}
-            colors={['red', 'orange', 'yellow', 'green']}
-            yAxisWidth={40}
-          />
-        </Card>
-      </Grid>
-
-      <Card>
-        <Title>Recent Alerts</Title>
-        <div className="mt-6 space-y-4">
-          {recentAlerts.map((alert) => (
-            <div
-              key={alert.id}
-              className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-              onClick={() => setSelectedAlert(alert)}
-            >
-              <Flex>
-                <div>
-                  <Badge color={getSeverityColor(alert.severity)} size="xs">
-                    {alert.severity.toUpperCase()}
-                  </Badge>
-                  <Text className="font-medium mt-1">{alert.title}</Text>
-                  <Text className="text-sm text-gray-500">{alert.description}</Text>
-                </div>
-                <Text className="text-sm text-gray-500">
-                  {new Date(alert.timestamp).toLocaleString()}
-                </Text>
-              </Flex>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="col-span-1 lg:col-span-2">
+          <div className="bg-card p-6 rounded-lg border border-border">
+            <h2 className="text-lg font-semibold text-card-foreground">Alert Trends</h2>
+            <div className="h-[300px] mt-4">
+              {/* LineChart component would go here */}
             </div>
-          ))}
+          </div>
         </div>
-      </Card>
+
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Alert Distribution</h2>
+          <div className="h-[300px] mt-4">
+            {/* BarChart component would go here */}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-lg border border-border">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-card-foreground">Recent Alerts</h2>
+          <div className="mt-6 space-y-4">
+            {recentAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className="p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer"
+                onClick={() => setSelectedAlert(alert)}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(alert.severity)}`}>
+                      {alert.severity.toUpperCase()}
+                    </span>
+                    <h3 className="font-medium mt-1 text-card-foreground">{alert.title}</h3>
+                    <p className="text-sm text-muted-foreground">{alert.description}</p>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(alert.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {selectedAlert && (
-        <Card>
-          <Title>Alert Details</Title>
+        <div className="bg-card p-6 rounded-lg border border-border">
+          <h2 className="text-lg font-semibold text-card-foreground">Alert Details</h2>
           <div className="mt-4">
-            <Badge color={getSeverityColor(selectedAlert.severity)} size="xs">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(selectedAlert.severity)}`}>
               {selectedAlert.severity.toUpperCase()}
-            </Badge>
-            <Text className="font-medium mt-2">{selectedAlert.title}</Text>
-            <Text className="text-gray-500 mt-1">{selectedAlert.description}</Text>
-            <Text className="text-sm text-gray-500 mt-4">
+            </span>
+            <h3 className="font-medium mt-2 text-card-foreground">{selectedAlert.title}</h3>
+            <p className="text-muted-foreground mt-1">{selectedAlert.description}</p>
+            <p className="text-sm text-muted-foreground mt-4">
               Detected at: {new Date(selectedAlert.timestamp).toLocaleString()}
-            </Text>
+            </p>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );

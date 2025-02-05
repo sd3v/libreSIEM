@@ -3,17 +3,20 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
   HomeIcon,
   ChartBarIcon,
   ShieldCheckIcon,
   BellIcon,
   CogIcon,
+  MagnifyingGlassIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
+  { name: 'Search', href: '/search', icon: MagnifyingGlassIcon },
   { name: 'Dashboard', href: '/', icon: HomeIcon },
+  { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Security', href: '/security', icon: ShieldCheckIcon },
   { name: 'Alerts', href: '/alerts', icon: BellIcon },
@@ -24,76 +27,45 @@ const Sidebar: FC = () => {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-gray-900/50 backdrop-blur-xl border-r border-white/10">
+    <div className="flex h-screen w-64 flex-col bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
       {/* Logo */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex h-16 items-center justify-center border-b border-white/10"
-      >
-        <span className="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+      <div className="flex h-16 items-center px-4 border-b border-gray-200 dark:border-gray-700">
+        <span className="text-xl font-bold text-gray-900 dark:text-white">
           LibreSIEM
         </span>
-      </motion.div>
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-2 py-4">
-        {navigation.map((item, index) => {
+      <nav className="flex-1 space-y-1 p-4">
+        {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <motion.div
+            <Link
               key={item.name}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
+              href={item.href}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+              }`}
             >
-              <Link
-                href={item.href}
-                className={`group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white shadow-lg shadow-blue-500/20'
-                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <item.icon
-                  className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors duration-200 ${
-                    isActive ? 'text-blue-400' : 'text-gray-400 group-hover:text-white'
-                  }`}
-                  aria-hidden="true"
-                />
-                <span className="relative">
-                  {item.name}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </span>
-              </Link>
-            </motion.div>
+              <item.icon className="h-5 w-5" aria-hidden="true" />
+              <span>{item.name}</span>
+            </Link>
           );
         })}
       </nav>
 
       {/* User Profile */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="flex items-center border-t border-white/10 p-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5"
-      >
-        <div className="relative h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-0.5">
-          <div className="absolute inset-0 rounded-full bg-gray-800" />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-50 blur" />
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600" />
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Admin User</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">admin@libresiem.org</p>
+          </div>
         </div>
-        <div className="ml-3">
-          <p className="text-sm font-medium text-white">Admin User</p>
-          <p className="text-xs text-blue-400">admin@libresiem.org</p>
-        </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

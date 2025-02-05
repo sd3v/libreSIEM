@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, Title, Text, Grid, Col, LineChart, BarChart, Metric, Flex, Badge, Button } from '@tremor/react';
 import { ShieldCheckIcon, ShieldExclamationIcon, BellAlertIcon } from '@heroicons/react/24/solid';
 
 const securityScore = 85;
@@ -45,104 +44,102 @@ const recentThreats = [
 
 const getThreatColor = (type: string) => {
   const colors = {
-    malware: 'red',
-    suspicious: 'orange',
-    policy: 'yellow',
+    malware: 'bg-destructive text-destructive-foreground',
+    suspicious: 'bg-warning text-warning-foreground',
+    policy: 'bg-yellow-500 text-yellow-50',
   };
-  return colors[type as keyof typeof colors] || 'gray';
+  return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
 };
 
 const getStatusColor = (status: string) => {
   const colors = {
-    blocked: 'green',
-    investigating: 'orange',
-    resolved: 'blue',
+    blocked: 'bg-success text-success-foreground',
+    investigating: 'bg-warning text-warning-foreground',
+    resolved: 'bg-primary text-primary-foreground',
   };
-  return colors[status as keyof typeof colors] || 'gray';
+  return colors[status as keyof typeof colors] || 'bg-muted text-muted-foreground';
 };
 
 export default function SecurityPage() {
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div>
-        <Title>Security Overview</Title>
-        <Text>Monitor and respond to security threats across your infrastructure</Text>
+        <h1 className="text-2xl font-semibold text-foreground">Security Overview</h1>
+        <p className="text-muted-foreground">Monitor and respond to security threats across your infrastructure</p>
       </div>
 
-      <Grid numItems={1} numItemsSm={2} numItemsLg={3} className="gap-6">
-        <Card decoration="top" decorationColor={securityScore >= 80 ? 'green' : 'red'}>
-          <Flex>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={`bg-card p-6 rounded-lg border border-border ${securityScore >= 80 ? 'border-t-4 border-t-success' : 'border-t-4 border-t-destructive'}`}>
+          <div className="flex justify-between items-start">
             <div>
-              <Text>Security Score</Text>
-              <Metric>{securityScore}%</Metric>
+              <p className="text-sm font-medium text-card-foreground">Security Score</p>
+              <p className="text-3xl font-semibold text-card-foreground mt-2">{securityScore}%</p>
             </div>
-            <ShieldCheckIcon className="w-8 h-8 text-green-500" />
-          </Flex>
-        </Card>
+            <ShieldCheckIcon className={`w-8 h-8 ${securityScore >= 80 ? 'text-success' : 'text-destructive'}`} />
+          </div>
+        </div>
 
-        <Card decoration="top" decorationColor="red">
-          <Flex>
+        <div className="bg-card p-6 rounded-lg border border-border border-t-4 border-t-destructive">
+          <div className="flex justify-between items-start">
             <div>
-              <Text>Active Threats</Text>
-              <Metric>{activeThreats}</Metric>
+              <p className="text-sm font-medium text-card-foreground">Active Threats</p>
+              <p className="text-3xl font-semibold text-card-foreground mt-2">{activeThreats}</p>
             </div>
-            <ShieldExclamationIcon className="w-8 h-8 text-red-500" />
-          </Flex>
-        </Card>
+            <ShieldExclamationIcon className="w-8 h-8 text-destructive" />
+          </div>
+        </div>
 
-        <Card decoration="top" decorationColor="orange">
-          <Flex>
+        <div className="bg-card p-6 rounded-lg border border-border border-t-4 border-t-warning">
+          <div className="flex justify-between items-start">
             <div>
-              <Text>Active Alerts</Text>
-              <Metric>{activeAlerts}</Metric>
+              <p className="text-sm font-medium text-card-foreground">Active Alerts</p>
+              <p className="text-3xl font-semibold text-card-foreground mt-2">{activeAlerts}</p>
             </div>
-            <BellAlertIcon className="w-8 h-8 text-orange-500" />
-          </Flex>
-        </Card>
-      </Grid>
+            <BellAlertIcon className="w-8 h-8 text-warning" />
+          </div>
+        </div>
+      </div>
 
-      <Grid numItems={1} numItemsSm={2} className="gap-6">
-        <Col numColSpan={1} numColSpanLg={2}>
-          <Card>
-            <Title>Threat Activity</Title>
-            <LineChart
-              className="mt-6"
-              data={threatData}
-              index="date"
-              categories={['Malware Detected', 'Suspicious Activity', 'Policy Violations']}
-              colors={['red', 'orange', 'yellow']}
-              yAxisWidth={40}
-            />
-          </Card>
-        </Col>
-      </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="col-span-1 lg:col-span-2">
+          <div className="bg-card p-6 rounded-lg border border-border">
+            <h2 className="text-lg font-semibold text-card-foreground">Threat Activity</h2>
+            {/* Replace with a more customizable chart component */}
+            <div className="h-[300px] mt-6 bg-muted rounded-md flex items-center justify-center">
+              <p className="text-muted-foreground">Chart placeholder - implement with a custom chart library</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <Title>Recent Threats</Title>
+      <div className="bg-card p-6 rounded-lg border border-border">
+        <h2 className="text-lg font-semibold text-card-foreground">Recent Threats</h2>
         <div className="mt-6 space-y-4">
           {recentThreats.map((threat) => (
-            <div key={threat.id} className="p-4 border rounded-lg">
-              <Flex>
+            <div key={threat.id} className="p-4 bg-muted rounded-lg">
+              <div className="flex justify-between items-start">
                 <div>
                   <div className="flex space-x-2">
-                    <Badge color={getThreatColor(threat.type)} size="xs">
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getThreatColor(threat.type)}`}>
                       {threat.type.toUpperCase()}
-                    </Badge>
-                    <Badge color={getStatusColor(threat.status)} size="xs">
+                    </span>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(threat.status)}`}>
                       {threat.status.toUpperCase()}
-                    </Badge>
+                    </span>
                   </div>
-                  <Text className="font-medium mt-1">{threat.title}</Text>
-                  <Text className="text-sm text-gray-500">{threat.description}</Text>
+                  <h3 className="font-medium text-card-foreground mt-2">{threat.title}</h3>
+                  <p className="text-sm text-muted-foreground">{threat.description}</p>
                 </div>
-                <Button size="xs" variant="secondary">
+                <button
+                  className="px-3 py-1.5 bg-secondary text-secondary-foreground text-sm rounded-md hover:bg-secondary/90"
+                >
                   Investigate
-                </Button>
-              </Flex>
+                </button>
+              </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
