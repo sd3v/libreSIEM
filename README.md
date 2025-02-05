@@ -1,5 +1,18 @@
 # LibreSIEM
 
+A modern, open-source Security Information and Event Management (SIEM) system with real-time monitoring, advanced analytics, and a beautiful dashboard.
+
+## Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](./SIEMS_Images/Dashboard.png)
+
+### Security Monitoring
+![Security Monitoring](./SIEMS_Images/Security.png)
+
+### Analytics and Reporting
+![Analytics and Reporting](./SIEMS_Images/Analytics.png)
+
 ## Quick Start
 
 ```bash
